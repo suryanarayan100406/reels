@@ -118,12 +118,61 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated during roadmap creation) | | |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INFRA-07 | Phase 1 | Pending |
+| INFRA-08 | Phase 1 | Pending |
+| ADMN-01 | Phase 1 | Pending |
+| ADMN-02 | Phase 1 | Pending |
+| ADMN-03 | Phase 2 | Pending |
+| ADMN-04 | Phase 2 | Pending |
+| ADMN-05 | Phase 2 | Pending |
+| ADMN-06 | Phase 2 | Pending |
+| ADMN-07 | Phase 2 | Pending |
+| ADMN-08 | Phase 2 | Pending |
+| INFRA-03 | Phase 2 | Pending |
+| HERO-01 | Phase 3 | Pending |
+| HERO-02 | Phase 3 | Pending |
+| HERO-03 | Phase 3 | Pending |
+| HERO-04 | Phase 3 | Pending |
+| HERO-05 | Phase 3 | Pending |
+| HERO-06 | Phase 3 | Pending |
+| HERO-07 | Phase 3 | Pending |
+| HERO-08 | Phase 3 | Pending |
+| REEL-01 | Phase 4 | Pending |
+| REEL-02 | Phase 4 | Pending |
+| REEL-03 | Phase 4 | Pending |
+| REEL-04 | Phase 4 | Pending |
+| REEL-05 | Phase 4 | Pending |
+| REEL-06 | Phase 4 | Pending |
+| REEL-07 | Phase 4 | Pending |
+| REEL-08 | Phase 4 | Pending |
+| REEL-09 | Phase 4 | Pending |
+| REEL-10 | Phase 4 | Pending |
+| REEL-11 | Phase 4 | Pending |
+| REEL-12 | Phase 4 | Pending |
+| REACT-01 | Phase 5 | Pending |
+| REACT-02 | Phase 5 | Pending |
+| REACT-03 | Phase 5 | Pending |
+| REACT-04 | Phase 5 | Pending |
+| REACT-05 | Phase 5 | Pending |
+| ADMN-09 | Phase 5 | Pending |
+| ADMN-10 | Phase 6 | Pending |
+| UX-01 | Phase 7 | Pending |
+| UX-02 | Phase 7 | Pending |
+| UX-03 | Phase 7 | Pending |
+| UX-04 | Phase 7 | Pending |
+| UX-05 | Phase 7 | Pending |
+| UX-06 | Phase 7 | Pending |
+| UX-07 | Phase 7 | Pending |
+| INFRA-05 | Phase 7 | Pending |
+| INFRA-06 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 39 total
-- Mapped to phases: 0
-- Unmapped: 39 ⚠️
+- Mapped to phases: 39
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-02*
