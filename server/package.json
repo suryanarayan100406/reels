@@ -7,23 +7,15 @@
   "scripts": {
     "test": "vitest --run"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@libsql/client": "^0.17.3",
-    "@vercel/blob": "^2.3.3",
-    "bcrypt": "^6.0.0",
-    "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.9.0",
-    "better-sqlite3-session-store": "^0.1.0",
+    "@vercel/blob": "^0.27.1",
+    "bcryptjs": "^3.0.2",
     "cheerio": "^1.2.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "helmet": "^8.1.0",
-    "pg": "^8.20.0"
+    "helmet": "^8.1.0"
   },
   "devDependencies": {
     "supertest": "^7.2.2",
