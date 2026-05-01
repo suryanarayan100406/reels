@@ -1,6 +1,7 @@
 {
   "name": "if-you-ever-wondered",
   "version": "1.0.0",
+  "type": "module",
   "private": true,
   "description": "A hand-curated Instagram reel gallery — a personal gift site",
   "scripts": {
