@@ -7,9 +7,6 @@ const router = express.Router();
 
 router.post('/login', async (req, res) => {
   const { password } = req.body;
-  
-  // TEMPORARY: Reset admin to allow new password setup
-  await db.run('DELETE FROM admin');
 
   if (!password) {
     return res.status(400).json({ error: 'Password is required' });

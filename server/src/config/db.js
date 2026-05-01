@@ -105,14 +105,22 @@ const db = {
     if (sqlLower.includes('from reels')) {
       // Handle the complex gallery query with reaction counts and visitor status
       const visitor_id = params[0];
-      return cache.reels.map(reel => {
+      const reels = cache.reels.map(reel => {
         const reactions = cache.reactions.filter(rx => rx.reel_id === reel.id);
         return {
           ...reel,
           reaction_count: reactions.length,
           has_reacted: reactions.some(rx => rx.visitor_id === visitor_id)
         };
-      }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      });
+
+      // Shuffle the reels for a "jumbled" order
+      for (let i = reels.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [reels[i], reels[j]] = [reels[j], reels[i]];
+      }
+
+      return reels;
     }
 
     return [];
