@@ -6,6 +6,7 @@ import session from 'express-session';
 import betterSqlite3SessionStore from 'better-sqlite3-session-store';
 import db from './config/db.js';
 import authRoutes from './routes/auth.js';
+import reelsRoutes from './routes/reels.js';
 
 dotenv.config();
 
@@ -38,6 +39,7 @@ app.use(
 );
 
 app.use('/api/auth', authRoutes);
+app.use('/api/reels', reelsRoutes);
 
 app.get('/api/ping', (req, res) => {
   res.json({ status: 'ok' });
