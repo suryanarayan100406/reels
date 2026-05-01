@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: if-you-ever-wondered
+    env: node
+    buildCommand: npm run build:render
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: META_APP_ID
+        value: "1456662755606888"
+      - key: META_APP_SECRET
+        sync: false
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

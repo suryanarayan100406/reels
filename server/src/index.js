@@ -38,6 +38,20 @@ app.get('/api/ping', (req, res) => {
   res.json({ status: 'ok' });
 });
 
+// Serve static frontend in production
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../client/dist')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../client/dist/index.html'));
+  });
+}
+
 // Start server if not imported as a module
 if (process.argv[1] && process.argv[1].endsWith('index.js')) {
   const port = process.env.PORT || 3000;
