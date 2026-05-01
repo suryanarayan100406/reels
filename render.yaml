@@ -10,7 +10,7 @@ services:
       - key: SESSION_SECRET
         generateValue: true
       - key: META_APP_ID
-        value: "1456662755606888"
+        value: ""
       - key: META_APP_SECRET
         sync: false
     disk:
