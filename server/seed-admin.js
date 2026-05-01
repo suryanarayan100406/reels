@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import db from './src/config/db.js';
 
 const password = process.argv[2] || 'admin123';
