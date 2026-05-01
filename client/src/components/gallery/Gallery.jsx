@@ -60,7 +60,7 @@ function ReelFeedItem({ reel }) {
         ref={containerRef}
         className="relative rounded-2xl overflow-hidden bg-black shadow-lg mx-auto"
         onDoubleClick={handleDoubleTap}
-        style={{ aspectRatio: '9/16', maxHeight: '80vh', maxWidth: '400px' }}
+        style={{ aspectRatio: '9/14', maxHeight: '75vh', maxWidth: '400px' }}
       >
         <iframe
           src={embedSrc}
@@ -69,13 +69,23 @@ function ReelFeedItem({ reel }) {
             top: '-56px',
             left: '50%',
             transform: 'translateX(-50%)',
-            width: '110%',
-            height: 'calc(100% + 56px + 350px)',
+            width: '120%',
+            height: 'calc(100% + 56px + 500px)',
+            pointerEvents: 'auto',
           }}
           allowFullScreen
           allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
           loading="lazy"
           title={`Reel ${reel.id}`}
+        />
+
+        {/* Bottom overlay — covers IG footer (likes, comments, etc.) */}
+        <div
+          className="absolute bottom-0 left-0 right-0 z-10 pointer-events-none"
+          style={{
+            height: '30%',
+            background: 'linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 40%, rgb(0,0,0) 100%)',
+          }}
         />
 
         {/* Big heart animation on double tap */}
