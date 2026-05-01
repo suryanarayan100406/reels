@@ -1,26 +1,29 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { getVisitorId } from '../../utils/visitor';
 import { LoadingState, EmptyState, ErrorState } from './GalleryStates';
 
+function extractShortcode(url) {
+  const match = url.match(/\/reel\/([^/?]+)/);
+  return match ? match[1] : null;
+}
+
 function ReelFeedItem({ reel }) {
-  const embedRef = useRef(null);
   const [reacted, setReacted] = useState(reel.has_reacted);
+  const [showHeart, setShowHeart] = useState(false);
+  const containerRef = useRef(null);
 
-  // Process Instagram embed when this item mounts
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (window.instgrm && window.instgrm.Embeds) {
-        window.instgrm.Embeds.process(embedRef.current);
-      }
-    }, 200);
-    return () => clearTimeout(timer);
-  }, []);
+  const handleReact = async () => {
+    const newState = !reacted;
+    setReacted(newState);
 
-  const handleReact = async (e) => {
-    e.stopPropagation();
-    setReacted(!reacted);
+    // Show the big heart animation on like
+    if (newState) {
+      setShowHeart(true);
+      setTimeout(() => setShowHeart(false), 800);
+    }
+
     try {
       const res = await fetch(`/api/reels/${reel.id}/react`, {
         method: 'POST',
@@ -29,9 +32,20 @@ function ReelFeedItem({ reel }) {
       });
       if (!res.ok) throw new Error('Failed');
     } catch (err) {
-      setReacted(reacted);
+      setReacted(!newState);
     }
   };
+
+  const handleDoubleTap = () => {
+    if (!reacted) handleReact();
+    else {
+      setShowHeart(true);
+      setTimeout(() => setShowHeart(false), 800);
+    }
+  };
+
+  const shortcode = extractShortcode(reel.instagram_url);
+  const embedSrc = `https://www.instagram.com/reel/${shortcode}/embed/?cr=1&v=14&wp=540`;
 
   return (
     <motion.article
@@ -39,40 +53,67 @@ function ReelFeedItem({ reel }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm border border-warm-cream/50 overflow-hidden"
+      className="relative"
     >
-      {/* Embedded Instagram Player */}
+      {/* Reel Video Container — clips IG header & footer */}
       <div
-        ref={embedRef}
-        className="w-full flex justify-center bg-white pt-4 px-2"
-        dangerouslySetInnerHTML={{ __html: reel.embed_html }}
-      />
+        ref={containerRef}
+        className="relative rounded-2xl overflow-hidden bg-black shadow-lg"
+        onDoubleClick={handleDoubleTap}
+        style={{ aspectRatio: '9/16', maxHeight: '75vh' }}
+      >
+        <iframe
+          src={embedSrc}
+          className="absolute border-0"
+          style={{
+            top: '-64px',
+            left: 0,
+            width: '100%',
+            height: 'calc(100% + 64px + 220px)',
+          }}
+          allowFullScreen
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          loading="lazy"
+          title={`Reel ${reel.id}`}
+        />
 
-      {/* Personal Note + React Button */}
-      <div className="p-5 md:p-6 bg-warm-cream/20 border-t border-warm-cream/40">
-        <div className="flex items-start justify-between gap-4">
-          <p className="text-charcoal/80 text-[15px] leading-relaxed whitespace-pre-wrap flex-1">
-            {reel.personal_note}
-          </p>
-          <button
-            onClick={handleReact}
-            className={`shrink-0 p-2.5 rounded-full transition-all duration-300 ${
-              reacted
-                ? 'bg-terracotta/10 scale-110'
-                : 'bg-charcoal/5 hover:bg-terracotta/10'
-            }`}
-            aria-label="React to reel"
-          >
+        {/* Big heart animation on double tap */}
+        <AnimatePresence>
+          {showHeart && (
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 1.5, opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+              className="absolute inset-0 flex items-center justify-center pointer-events-none z-20"
+            >
+              <Heart size={80} className="fill-white text-white drop-shadow-lg" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Custom Note + Like Button below the reel */}
+      <div className="flex items-start gap-3 mt-3 px-1">
+        <p className="text-charcoal/80 text-[15px] leading-relaxed whitespace-pre-wrap flex-1">
+          {reel.personal_note}
+        </p>
+        <button
+          onClick={handleReact}
+          className="shrink-0 mt-0.5 group"
+          aria-label="React to reel"
+        >
+          <motion.div whileTap={{ scale: 1.3 }}>
             <Heart
-              size={20}
-              className={`transition-colors ${
+              size={24}
+              className={`transition-all duration-300 ${
                 reacted
-                  ? 'fill-terracotta text-terracotta'
-                  : 'text-charcoal/40'
+                  ? 'fill-terracotta text-terracotta scale-110'
+                  : 'text-charcoal/30 group-hover:text-terracotta/60'
               }`}
             />
-          </button>
-        </div>
+          </motion.div>
+        </button>
       </div>
     </motion.article>
   );
@@ -99,7 +140,7 @@ export default function Gallery() {
   }, []);
 
   return (
-    <section className="w-full max-w-xl mx-auto pb-24 px-4">
+    <section className="w-full max-w-md mx-auto pb-24 px-4">
       {loading ? (
         <LoadingState />
       ) : error ? (
@@ -107,7 +148,7 @@ export default function Gallery() {
       ) : reels.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-10">
           {reels.map(reel => (
             <ReelFeedItem key={reel.id} reel={reel} />
           ))}
