@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@libsql/client": "^0.17.3",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.9.0",
     "better-sqlite3-session-store": "^0.1.0",

@@ -1,4 +1,4 @@
-import Database from 'better-sqlite3';
+import { createClient } from '@libsql/client';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -6,17 +6,51 @@ import { fileURLToPath } from 'url';
 dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const defaultDbPath = path.join(__dirname, '../../data/app.db');
 
-const dbPath = process.env.DATABASE_PATH || defaultDbPath;
+// Use Turso in production, local SQLite file in development
+const tursoUrl = process.env.TURSO_DATABASE_URL;
+const tursoToken = process.env.TURSO_AUTH_TOKEN;
 
-const db = new Database(dbPath);
+const client = createClient(
+  tursoUrl
+    ? { url: tursoUrl, authToken: tursoToken }
+    : { url: `file:${path.join(__dirname, '../../data/app.db')}` }
+);
 
-// Enable WAL mode for better concurrent performance
-db.pragma('journal_mode = WAL');
+// Wrapper with a cleaner API (mirrors better-sqlite3 style but async)
+const db = {
+  /** Run a query and return the first row, or null */
+  async get(sql, ...params) {
+    const result = await client.execute({ sql, args: params });
+    return result.rows[0] || null;
+  },
+
+  /** Run a query and return all rows */
+  async all(sql, ...params) {
+    const result = await client.execute({ sql, args: params });
+    return result.rows;
+  },
+
+  /** Run an insert/update/delete and return { changes, lastInsertRowid } */
+  async run(sql, ...params) {
+    const result = await client.execute({ sql, args: params });
+    return {
+      changes: Number(result.rowsAffected),
+      lastInsertRowid: Number(result.lastInsertRowid),
+    };
+  },
+
+  /** Execute raw SQL (e.g. schema creation) */
+  async exec(sql) {
+    await client.executeMultiple(sql);
+  },
+
+  /** Direct client access for advanced use */
+  client,
+};
 
 // Initialize schema
-db.exec(`
+await db.exec(`
   CREATE TABLE IF NOT EXISTS admin (
     id INTEGER PRIMARY KEY,
     password_hash TEXT NOT NULL

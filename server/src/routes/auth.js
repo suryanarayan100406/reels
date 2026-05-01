@@ -12,10 +12,9 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ error: 'Password is required' });
   }
 
-  const admin = db.prepare('SELECT * FROM admin LIMIT 1').get();
+  const admin = await db.get('SELECT * FROM admin LIMIT 1');
 
   if (!admin) {
-    // If no admin exists yet, log error (normally would seed it or have an initial setup)
     return res.status(500).json({ error: 'Admin account not initialized' });
   }
 

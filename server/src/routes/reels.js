@@ -6,15 +6,15 @@ import { generateEmbedHtml, extractThumbnail } from '../services/instagram.js';
 const router = express.Router();
 
 // GET /api/reels/stats/reactions - Admin dashboard stats
-router.get('/stats/reactions', requireAuth, (req, res) => {
+router.get('/stats/reactions', requireAuth, async (req, res) => {
   try {
-    const stats = db.prepare(`
+    const stats = await db.all(`
       SELECT r.id, r.instagram_url, r.personal_note, COUNT(rx.id) as reaction_count
       FROM reels r
       LEFT JOIN reactions rx ON r.id = rx.reel_id
       GROUP BY r.id
       ORDER BY reaction_count DESC
-    `).all();
+    `);
     res.json(stats);
   } catch (err) {
     console.error('Failed to fetch reaction stats:', err);
@@ -23,11 +23,11 @@ router.get('/stats/reactions', requireAuth, (req, res) => {
 });
 
 // GET /api/reels - Publicly accessible list of reels
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
   const { visitor_id } = req.query;
   
   try {
-    const stmt = db.prepare(`
+    const reels = await db.all(`
       SELECT r.*, 
              COUNT(rx.id) as reaction_count,
              EXISTS(SELECT 1 FROM reactions WHERE reel_id = r.id AND visitor_id = ?) as has_reacted
@@ -35,9 +35,7 @@ router.get('/', (req, res) => {
       LEFT JOIN reactions rx ON r.id = rx.reel_id
       GROUP BY r.id
       ORDER BY r.created_at DESC
-    `);
-    
-    const reels = stmt.all(visitor_id || null);
+    `, visitor_id || '');
     
     // Convert SQLite integer boolean (0/1) to true boolean
     reels.forEach(r => r.has_reacted = !!r.has_reacted);
@@ -65,14 +63,12 @@ router.post('/', requireAuth, async (req, res) => {
     const thumbnail_url = await extractThumbnail(instagram_url);
 
     // 3. Insert into DB
-    const insert = db.prepare(`
-      INSERT INTO reels (instagram_url, embed_html, thumbnail_url, personal_note)
-      VALUES (?, ?, ?, ?)
-    `);
+    const info = await db.run(
+      'INSERT INTO reels (instagram_url, embed_html, thumbnail_url, personal_note) VALUES (?, ?, ?, ?)',
+      instagram_url, embed_html, thumbnail_url, personal_note || null
+    );
     
-    const info = insert.run(instagram_url, embed_html, thumbnail_url, personal_note || null);
-    
-    const newReel = db.prepare('SELECT * FROM reels WHERE id = ?').get(info.lastInsertRowid);
+    const newReel = await db.get('SELECT * FROM reels WHERE id = ?', info.lastInsertRowid);
     res.status(201).json(newReel);
   } catch (err) {
     console.error('Failed to add reel:', err);
@@ -87,7 +83,7 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // POST /api/reels/:id/react - Toggle a reaction (Public)
-router.post('/:id/react', (req, res) => {
+router.post('/:id/react', async (req, res) => {
   const { id } = req.params;
   const { visitor_id } = req.body;
 
@@ -97,19 +93,19 @@ router.post('/:id/react', (req, res) => {
 
   try {
     // Check if reel exists
-    const reel = db.prepare('SELECT id FROM reels WHERE id = ?').get(id);
+    const reel = await db.get('SELECT id FROM reels WHERE id = ?', id);
     if (!reel) {
       return res.status(404).json({ error: 'Reel not found' });
     }
 
-    const existing = db.prepare('SELECT id FROM reactions WHERE reel_id = ? AND visitor_id = ?').get(id, visitor_id);
+    const existing = await db.get('SELECT id FROM reactions WHERE reel_id = ? AND visitor_id = ?', id, visitor_id);
     let action;
     
     if (existing) {
-      db.prepare('DELETE FROM reactions WHERE id = ?').run(existing.id);
+      await db.run('DELETE FROM reactions WHERE id = ?', existing.id);
       action = 'removed';
     } else {
-      db.prepare('INSERT INTO reactions (reel_id, visitor_id) VALUES (?, ?)').run(id, visitor_id);
+      await db.run('INSERT INTO reactions (reel_id, visitor_id) VALUES (?, ?)', id, visitor_id);
       action = 'added';
     }
     
@@ -126,7 +122,7 @@ router.put('/:id', requireAuth, async (req, res) => {
   const { instagram_url, personal_note } = req.body;
 
   try {
-    const existingReel = db.prepare('SELECT * FROM reels WHERE id = ?').get(id);
+    const existingReel = await db.get('SELECT * FROM reels WHERE id = ?', id);
     if (!existingReel) {
       return res.status(404).json({ error: 'Reel not found' });
     }
@@ -140,13 +136,8 @@ router.put('/:id', requireAuth, async (req, res) => {
       thumbnail_url = await extractThumbnail(instagram_url);
     }
 
-    const update = db.prepare(`
-      UPDATE reels 
-      SET instagram_url = ?, embed_html = ?, thumbnail_url = ?, personal_note = ?, updated_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `);
-    
-    update.run(
+    await db.run(
+      'UPDATE reels SET instagram_url = ?, embed_html = ?, thumbnail_url = ?, personal_note = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
       instagram_url || existingReel.instagram_url,
       embed_html,
       thumbnail_url,
@@ -154,7 +145,7 @@ router.put('/:id', requireAuth, async (req, res) => {
       id
     );
 
-    const updatedReel = db.prepare('SELECT * FROM reels WHERE id = ?').get(id);
+    const updatedReel = await db.get('SELECT * FROM reels WHERE id = ?', id);
     res.json(updatedReel);
   } catch (err) {
     console.error('Failed to update reel:', err);
@@ -163,12 +154,11 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // DELETE /api/reels/:id - Delete a reel (Admin only)
-router.delete('/:id', requireAuth, (req, res) => {
+router.delete('/:id', requireAuth, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deleteReel = db.prepare('DELETE FROM reels WHERE id = ?');
-    const info = deleteReel.run(id);
+    const info = await db.run('DELETE FROM reels WHERE id = ?', id);
 
     if (info.changes === 0) {
       return res.status(404).json({ error: 'Reel not found' });
