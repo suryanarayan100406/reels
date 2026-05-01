@@ -58,18 +58,19 @@ function ReelFeedItem({ reel }) {
       {/* Reel Video Container — clips IG header & footer */}
       <div
         ref={containerRef}
-        className="relative rounded-2xl overflow-hidden bg-black shadow-lg"
+        className="relative rounded-2xl overflow-hidden bg-black shadow-lg mx-auto"
         onDoubleClick={handleDoubleTap}
-        style={{ aspectRatio: '9/16', maxHeight: '75vh' }}
+        style={{ aspectRatio: '9/16', maxHeight: '80vh', maxWidth: '400px' }}
       >
         <iframe
           src={embedSrc}
           className="absolute border-0"
           style={{
-            top: '-64px',
-            left: 0,
-            width: '100%',
-            height: 'calc(100% + 64px + 220px)',
+            top: '-56px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '110%',
+            height: 'calc(100% + 56px + 350px)',
           }}
           allowFullScreen
           allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
