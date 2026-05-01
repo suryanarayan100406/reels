@@ -11,6 +11,7 @@ dotenv.config();
 
 const app = express();
 
+app.set('trust proxy', 1); // Required for Vercel
 app.use(helmet());
 const allowedOrigins = process.env.CORS_ORIGIN || '*';
 app.use(cors({ origin: allowedOrigins === '*' ? true : allowedOrigins, credentials: true }));
@@ -35,7 +36,7 @@ app.use('/api/reels', reelsRoutes);
 app.use('/api/site_content', siteRoutes);
 
 app.get('/api/ping', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
 // Serve static frontend in production
