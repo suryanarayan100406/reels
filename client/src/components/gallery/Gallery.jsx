@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReelCard from './ReelCard';
 import Lightbox from './Lightbox';
+import { getVisitorId } from '../../utils/visitor';
 
 export default function Gallery() {
   const [reels, setReels] = useState([]);
@@ -8,12 +9,12 @@ export default function Gallery() {
   const [selectedReel, setSelectedReel] = useState(null);
 
   useEffect(() => {
-    fetch('/api/reels')
+    const vid = getVisitorId();
+    fetch(`/api/reels?visitor_id=${vid}`)
       .then(res => res.json())
       .then(data => {
-        // Sort newest first
-        const sorted = data.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        setReels(sorted);
+        // Backend handles sorting now
+        setReels(data);
       })
       .catch(err => console.error('Failed to fetch reels:', err))
       .finally(() => setLoading(false));

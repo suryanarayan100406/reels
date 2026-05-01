@@ -5,10 +5,43 @@ import { fetchOEmbedData, extractThumbnail } from '../services/instagram.js';
 
 const router = express.Router();
 
+// GET /api/reels/stats/reactions - Admin dashboard stats
+router.get('/stats/reactions', requireAuth, (req, res) => {
+  try {
+    const stats = db.prepare(`
+      SELECT r.id, r.instagram_url, r.personal_note, COUNT(rx.id) as reaction_count
+      FROM reels r
+      LEFT JOIN reactions rx ON r.id = rx.reel_id
+      GROUP BY r.id
+      ORDER BY reaction_count DESC
+    `).all();
+    res.json(stats);
+  } catch (err) {
+    console.error('Failed to fetch reaction stats:', err);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
 // GET /api/reels - Publicly accessible list of reels
 router.get('/', (req, res) => {
+  const { visitor_id } = req.query;
+  
   try {
-    const reels = db.prepare('SELECT * FROM reels ORDER BY created_at DESC').all();
+    const stmt = db.prepare(`
+      SELECT r.*, 
+             COUNT(rx.id) as reaction_count,
+             EXISTS(SELECT 1 FROM reactions WHERE reel_id = r.id AND visitor_id = ?) as has_reacted
+      FROM reels r
+      LEFT JOIN reactions rx ON r.id = rx.reel_id
+      GROUP BY r.id
+      ORDER BY r.created_at DESC
+    `);
+    
+    const reels = stmt.all(visitor_id || null);
+    
+    // Convert SQLite integer boolean (0/1) to true boolean
+    reels.forEach(r => r.has_reacted = !!r.has_reacted);
+    
     res.json(reels);
   } catch (err) {
     console.error('Failed to fetch reels:', err);
@@ -50,6 +83,40 @@ router.post('/', requireAuth, async (req, res) => {
         return res.status(400).json({ error: err.message });
     }
     res.status(500).json({ error: 'Failed to add reel: ' + err.message });
+  }
+});
+
+// POST /api/reels/:id/react - Toggle a reaction (Public)
+router.post('/:id/react', (req, res) => {
+  const { id } = req.params;
+  const { visitor_id } = req.body;
+
+  if (!visitor_id) {
+    return res.status(400).json({ error: 'visitor_id is required' });
+  }
+
+  try {
+    // Check if reel exists
+    const reel = db.prepare('SELECT id FROM reels WHERE id = ?').get(id);
+    if (!reel) {
+      return res.status(404).json({ error: 'Reel not found' });
+    }
+
+    const existing = db.prepare('SELECT id FROM reactions WHERE reel_id = ? AND visitor_id = ?').get(id, visitor_id);
+    let action;
+    
+    if (existing) {
+      db.prepare('DELETE FROM reactions WHERE id = ?').run(existing.id);
+      action = 'removed';
+    } else {
+      db.prepare('INSERT INTO reactions (reel_id, visitor_id) VALUES (?, ?)').run(id, visitor_id);
+      action = 'added';
+    }
+    
+    res.json({ status: 'ok', action });
+  } catch (err) {
+    console.error('Failed to toggle reaction:', err);
+    res.status(500).json({ error: 'Failed to toggle reaction' });
   }
 });
 

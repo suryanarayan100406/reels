@@ -156,4 +156,73 @@ describe('Reels API', () => {
       expect(getRes.body).toHaveLength(0);
     });
   });
+
+  describe('Reactions', () => {
+    let reelId;
+    const visitorId = 'test-visitor-123';
+
+    beforeAll(async () => {
+      // Create a test reel
+      const res = await request(app)
+        .post('/api/reels')
+        .set('Cookie', adminCookie)
+        .send({ instagram_url: 'https://www.instagram.com/reel/REACT123/' });
+      reelId = res.body.id;
+    });
+
+    it('should add a reaction', async () => {
+      const res = await request(app)
+        .post(`/api/reels/${reelId}/react`)
+        .send({ visitor_id: visitorId });
+      
+      expect(res.status).toBe(200);
+      expect(res.body.action).toBe('added');
+    });
+
+    it('should show reaction in GET /api/reels', async () => {
+      const res = await request(app).get(`/api/reels?visitor_id=${visitorId}`);
+      expect(res.status).toBe(200);
+      const reel = res.body.find(r => r.id === reelId);
+      expect(reel.reaction_count).toBe(1);
+      expect(reel.has_reacted).toBe(true);
+    });
+
+    it('should remove a reaction on second toggle', async () => {
+      const res = await request(app)
+        .post(`/api/reels/${reelId}/react`)
+        .send({ visitor_id: visitorId });
+      
+      expect(res.status).toBe(200);
+      expect(res.body.action).toBe('removed');
+    });
+
+    it('should reflect removed reaction in GET /api/reels', async () => {
+      const res = await request(app).get(`/api/reels?visitor_id=${visitorId}`);
+      expect(res.status).toBe(200);
+      const reel = res.body.find(r => r.id === reelId);
+      expect(reel.reaction_count).toBe(0);
+      expect(reel.has_reacted).toBe(false);
+    });
+
+    it('should require authentication for admin stats', async () => {
+      const res = await request(app).get('/api/reels/stats/reactions');
+      expect(res.status).toBe(401);
+    });
+
+    it('should return stats for admin', async () => {
+      // Re-add a reaction for stats
+      await request(app)
+        .post(`/api/reels/${reelId}/react`)
+        .send({ visitor_id: visitorId });
+
+      const res = await request(app)
+        .get('/api/reels/stats/reactions')
+        .set('Cookie', adminCookie);
+      
+      expect(res.status).toBe(200);
+      expect(Array.isArray(res.body)).toBe(true);
+      const stat = res.body.find(r => r.id === reelId);
+      expect(stat.reaction_count).toBe(1);
+    });
+  });
 });
