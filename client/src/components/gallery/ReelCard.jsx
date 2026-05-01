@@ -1,0 +1,37 @@
+import React from 'react';
+
+export default function ReelCard({ reel, onClick }) {
+  return (
+    <div 
+      onClick={onClick} 
+      className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(193,127,92,0.15)] hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full border border-warm-cream/50"
+    >
+      {reel.thumbnail_url ? (
+        <img 
+          src={reel.thumbnail_url} 
+          alt="Reel thumbnail" 
+          className="w-full aspect-[4/5] object-cover bg-warm-cream/50"
+          onError={(e) => {
+            e.target.style.display = 'none';
+            e.target.nextElementSibling.style.display = 'flex';
+          }}
+        />
+      ) : null}
+      
+      {/* Fallback box if no image or image fails to load */}
+      <div 
+        className="w-full aspect-[4/5] bg-warm-cream/50 flex items-center justify-center text-dusty-rose"
+        style={{ display: reel.thumbnail_url ? 'none' : 'flex' }}
+      >
+        <span>No thumbnail</span>
+      </div>
+
+      <div className="p-5 flex flex-col flex-grow">
+        <p className="text-charcoal/80 text-sm leading-relaxed line-clamp-3 mb-2 flex-grow whitespace-pre-wrap">
+          {reel.personal_note}
+        </p>
+        <span className="text-dusty-rose text-xs italic font-medium">read more</span>
+      </div>
+    </div>
+  );
+}
