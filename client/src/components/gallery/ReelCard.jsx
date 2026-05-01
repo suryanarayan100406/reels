@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Heart } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { getVisitorId } from '../../utils/visitor';
 
 export default function ReelCard({ reel, onClick }) {
@@ -29,7 +30,11 @@ export default function ReelCard({ reel, onClick }) {
   };
 
   return (
-    <div 
+    <motion.div 
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
       onClick={onClick} 
       className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-[0_8px_30px_rgb(193,127,92,0.15)] hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden flex flex-col h-full border border-warm-cream/50 relative"
     >
@@ -78,6 +83,6 @@ export default function ReelCard({ reel, onClick }) {
         </p>
         <span className="text-dusty-rose text-xs italic font-medium">read more</span>
       </div>
-    </div>
+    </motion.div>
   );
 }
