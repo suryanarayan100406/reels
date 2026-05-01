@@ -9,7 +9,7 @@
 
 | # | Phase | Goal | Requirements | Success Criteria |
 |---|-------|------|--------------|------------------|
-| 1 | Backend Foundation | Express server + SQLite database + admin auth | INFRA-01, INFRA-02, INFRA-04, INFRA-07, INFRA-08, ADMN-01, ADMN-02 | 3 |
+| 1 | Backend Foundation | 3/3 | Complete   | 2026-05-01 |
 | 2 | Reel CRUD & oEmbed | Admin can add/edit/delete reels with Instagram integration | ADMN-03, ADMN-04, ADMN-05, ADMN-06, ADMN-07, ADMN-08, INFRA-03 | 4 |
 | 3 | Frontend Foundation & Hero | React + Vite + TailwindCSS scaffold + hero/landing page | HERO-01, HERO-02, HERO-03, HERO-04, HERO-05, HERO-06, HERO-07, HERO-08 | 4 |
 | 4 | Reel Gallery & Lightbox | Public reel grid display + modal with embedded Instagram player | REEL-01, REEL-02, REEL-03, REEL-04, REEL-05, REEL-06, REEL-07, REEL-08, REEL-09, REEL-10, REEL-11, REEL-12 | 5 |

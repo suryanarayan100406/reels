@@ -32,22 +32,24 @@ test('POST /api/auth/login with invalid password returns 401', async () => {
   expect(res.status).toBe(401);
 });
 
-test('GET /api/auth/me without cookie returns 401', async () => {
-  const res = await request(app).get('/api/auth/me');
+test('GET /api/auth/verify without cookie returns 401', async () => {
+  const res = await request(app).get('/api/auth/verify');
   expect(res.status).toBe(401);
 });
 
-test('GET /api/auth/me with valid cookie returns 200', async () => {
+test('GET /api/auth/verify with valid cookie returns 200', async () => {
+  // Login first
   const loginRes = await request(app)
     .post('/api/auth/login')
     .send({ password: 'testpass' });
-    
+
   const cookie = loginRes.headers['set-cookie'];
-  
+
+  // Test protected route
   const res = await request(app)
-    .get('/api/auth/me')
+    .get('/api/auth/verify')
     .set('Cookie', cookie);
-    
+
   expect(res.status).toBe(200);
-  expect(res.body).toEqual({ admin: true });
+  expect(res.body).toEqual({ authenticated: true });
 });

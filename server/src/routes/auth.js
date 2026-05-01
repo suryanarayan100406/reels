@@ -34,8 +34,8 @@ router.post('/logout', (req, res) => {
   res.json({ status: 'ok' });
 });
 
-router.get('/me', requireAuth, (req, res) => {
-  res.json({ admin: true });
+router.get('/verify', requireAuth, (req, res) => {
+  res.json({ authenticated: true });
 });
 
 export default router;

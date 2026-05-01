@@ -7,6 +7,7 @@ import betterSqlite3SessionStore from 'better-sqlite3-session-store';
 import db from './config/db.js';
 import authRoutes from './routes/auth.js';
 import reelsRoutes from './routes/reels.js';
+import siteRoutes from './routes/site.js';
 
 dotenv.config();
 
@@ -40,6 +41,7 @@ app.use(
 
 app.use('/api/auth', authRoutes);
 app.use('/api/reels', reelsRoutes);
+app.use('/api/site_content', siteRoutes);
 
 app.get('/api/ping', (req, res) => {
   res.json({ status: 'ok' });
