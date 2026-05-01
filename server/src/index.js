@@ -12,8 +12,8 @@ dotenv.config();
 const app = express();
 
 app.use(helmet());
-const allowedOrigins = process.env.CORS_ORIGIN || 'http://localhost:5173';
-app.use(cors({ origin: allowedOrigins, credentials: true }));
+const allowedOrigins = process.env.CORS_ORIGIN || '*';
+app.use(cors({ origin: allowedOrigins === '*' ? true : allowedOrigins, credentials: true }));
 app.use(express.json());
 
 app.use(
