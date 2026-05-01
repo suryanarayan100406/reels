@@ -13,9 +13,13 @@ router.post('/login', async (req, res) => {
   }
 
   const admin = await db.get('SELECT * FROM admin LIMIT 1');
+  const saltRounds = 10;
 
   if (!admin) {
-    return res.status(500).json({ error: 'Admin account not initialized' });
+    const hash = await bcrypt.hash(password, saltRounds);
+    await db.run('INSERT INTO admin (password_hash) VALUES (?)', hash);
+    req.session.isAdmin = true;
+    return res.json({ status: 'ok', message: 'Admin account initialized' });
   }
 
   const match = await bcrypt.compare(password, admin.password_hash);
