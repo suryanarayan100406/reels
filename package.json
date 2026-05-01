@@ -1,0 +1,12 @@
+{
+  "name": "if-you-ever-wondered",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A hand-curated Instagram reel gallery — a personal gift site",
+  "scripts": {
+    "dev:server": "cd server && node src/index.js",
+    "dev:client": "cd client && npm run dev",
+    "build": "cd client && npm run build",
+    "install:all": "cd server && npm install && cd ../client && npm install"
+  }
+}
