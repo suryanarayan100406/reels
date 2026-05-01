@@ -1,7 +1,7 @@
 import express from 'express';
 import db from '../config/db.js';
 import { requireAuth } from '../middleware/auth.js';
-import { fetchOEmbedData, extractThumbnail } from '../services/instagram.js';
+import { generateEmbedHtml, extractThumbnail } from '../services/instagram.js';
 
 const router = express.Router();
 
@@ -58,8 +58,8 @@ router.post('/', requireAuth, async (req, res) => {
   }
 
   try {
-    // 1. Fetch oEmbed data
-    const embed_html = await fetchOEmbedData(instagram_url);
+    // 1. Generate embed HTML (no API keys needed)
+    const embed_html = generateEmbedHtml(instagram_url);
     
     // 2. Fetch thumbnail
     const thumbnail_url = await extractThumbnail(instagram_url);
@@ -136,7 +136,7 @@ router.put('/:id', requireAuth, async (req, res) => {
 
     // If URL changed, re-fetch data
     if (instagram_url && instagram_url !== existingReel.instagram_url) {
-      embed_html = await fetchOEmbedData(instagram_url);
+      embed_html = generateEmbedHtml(instagram_url);
       thumbnail_url = await extractThumbnail(instagram_url);
     }
 

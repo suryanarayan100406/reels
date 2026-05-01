@@ -5,11 +5,11 @@ import db from '../src/config/db.js';
 
 // Mock the instagram service
 vi.mock('../src/services/instagram.js', () => ({
-  fetchOEmbedData: vi.fn(async (url) => {
+  generateEmbedHtml: vi.fn((url) => {
     if (!url.includes('instagram.com/reel/')) {
       throw new Error('Invalid Instagram Reel URL');
     }
-    return '<blockquote>Mock Embed</blockquote>';
+    return '<blockquote class="instagram-media">Mock Embed</blockquote>';
   }),
   extractThumbnail: vi.fn(async (url) => {
     return 'https://example.com/mock-thumb.jpg';
@@ -65,7 +65,7 @@ describe('Reels API', () => {
       expect(res.status).toBe(201);
       expect(res.body.id).toBeDefined();
       expect(res.body.instagram_url).toBe('https://www.instagram.com/reel/XYZ123/');
-      expect(res.body.embed_html).toBe('<blockquote>Mock Embed</blockquote>');
+      expect(res.body.embed_html).toBe('<blockquote class="instagram-media">Mock Embed</blockquote>');
       expect(res.body.thumbnail_url).toBe('https://example.com/mock-thumb.jpg');
       expect(res.body.personal_note).toBe('A test note');
     });

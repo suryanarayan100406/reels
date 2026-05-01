@@ -13,7 +13,7 @@ export default function ReelsTable() {
     try {
       const res = await fetch('/api/reels');
       const data = await res.json();
-      setReels(data.reels || []);
+      setReels(data);
     } catch (err) {
       console.error('Failed to fetch reels', err);
     } finally {

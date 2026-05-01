@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { fetchOEmbedData, extractThumbnail } from '../src/services/instagram.js';
+import { generateEmbedHtml, extractThumbnail } from '../src/services/instagram.js';
 
 describe('Instagram Service', () => {
   beforeEach(() => {
-    process.env.META_APP_ID = 'test-id';
-    process.env.META_APP_SECRET = 'test-secret';
     vi.spyOn(global, 'fetch');
   });
 
@@ -12,35 +10,21 @@ describe('Instagram Service', () => {
     vi.restoreAllMocks();
   });
 
-  describe('fetchOEmbedData', () => {
-    it('should throw an error for invalid URLs', async () => {
-      await expect(fetchOEmbedData('https://youtube.com/watch?v=123')).rejects.toThrow('Invalid Instagram Reel URL');
+  describe('generateEmbedHtml', () => {
+    it('should throw an error for invalid URLs', () => {
+      expect(() => generateEmbedHtml('https://youtube.com/watch?v=123')).toThrow('Invalid Instagram Reel URL');
     });
 
-    it('should throw an error if env vars are missing', async () => {
-      delete process.env.META_APP_ID;
-      await expect(fetchOEmbedData('https://www.instagram.com/reel/XYZ123/')).rejects.toThrow('Missing META_APP_ID');
+    it('should generate embed html for valid URLs', () => {
+      const html = generateEmbedHtml('https://www.instagram.com/reel/XYZ123/');
+      expect(html).toContain('instagram-media');
+      expect(html).toContain('data-instgrm-permalink="https://www.instagram.com/reel/XYZ123/"');
+      expect(html).toContain('blockquote');
     });
 
-    it('should fetch oEmbed html successfully', async () => {
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ html: '<blockquote>Embed content</blockquote>' })
-      });
-
-      const html = await fetchOEmbedData('https://www.instagram.com/reel/XYZ123/');
-      expect(html).toBe('<blockquote>Embed content</blockquote>');
-      expect(global.fetch).toHaveBeenCalledWith(expect.stringContaining('access_token=test-id|test-secret'));
-    });
-
-    it('should handle API errors', async () => {
-      global.fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        text: async () => 'Bad Request'
-      });
-
-      await expect(fetchOEmbedData('https://www.instagram.com/reel/XYZ123/')).rejects.toThrow('Failed to fetch oEmbed data: 400 Bad Request');
+    it('should throw for null/empty input', () => {
+      expect(() => generateEmbedHtml(null)).toThrow('Invalid Instagram Reel URL');
+      expect(() => generateEmbedHtml('')).toThrow('Invalid Instagram Reel URL');
     });
   });
 
